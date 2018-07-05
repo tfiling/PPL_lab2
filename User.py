@@ -23,7 +23,7 @@ class User:
         self._userID = userID
         self._transactions = transactions
 
-    def calculatePastMonthIncome(self, row, returnStat):
+    def calculatePastMonthIncome(self, row):
         date = row[DATE]
         date = date.replace(day=1)
         lastDay = date - timedelta(days=1)
@@ -33,11 +33,16 @@ class User:
             lastMonthIncome = lastMonthIncome[lastMonthIncome[IS_INCOME]][AMOUNT]
             sum = lastMonthIncome.sum()
             count = len(lastMonthIncome)
-            self._incomeSumByMonth[firstDay] = {SUM: sum, COUNT: count}
+            self._incomeSumByMonth[firstDay] = pd.Series(
+                {
+                    'id': row['id'],
+                    PAST_MONTH_INCOME: sum,
+                    PAST_MONTH_INCOME_COUNT: count
+                })
 
-        return self._incomeSumByMonth[firstDay][returnStat]
+        return self._incomeSumByMonth[firstDay]
 
-    def calculatePastWeekIncome(self, row, returnStat):
+    def calculatePastWeekIncome(self, row):
         date = row[DATE]
         day = date.isocalendar()[2]
         firstDay = date - timedelta(days=day + 7)
@@ -47,16 +52,18 @@ class User:
             lastWeekIncome = lastWeekIncome[lastWeekIncome[IS_INCOME]][AMOUNT]
             sum = lastWeekIncome.sum()
             count = len(lastWeekIncome)
-            self._incomeSumByWeek[firstDay] = {SUM: sum, COUNT: count}
+            self._incomeSumByWeek[firstDay] = pd.Series(
+                {
+                    'id': row['id'],
+                    PAST_WEEK_INCOME: sum,
+                    PAST_WEEK_INCOME_COUNT: count
+                })
 
-        return self._incomeSumByWeek[firstDay][returnStat]
-
-
+        return self._incomeSumByWeek[firstDay]
 
     def addFeatures(self):
         self._transactions[IS_INCOME] = self._transactions.apply(lambda row: row[AMOUNT] < 0, axis=1)
-        self._transactions[PAST_MONTH_INCOME] = self._transactions.apply(lambda row: self.calculatePastMonthIncome(row, SUM), axis=1)
-        self._transactions[PAST_WEEK_INCOME] = pd.DataFrame(self._transactions.apply(lambda row: self.calculatePastWeekIncome(row, SUM), axis=1))
-        self._transactions[PAST_MONTH_INCOME_COUNT] = self._transactions.apply(lambda row: self.calculatePastMonthIncome(row, COUNT), axis=1)
-        self._transactions[PAST_WEEK_INCOME_COUNT] = pd.DataFrame(self._transactions.apply(lambda row: self.calculatePastWeekIncome(row, COUNT), axis=1))
+        monthlyIncomeFeatures = self._transactions.apply(self.calculatePastMonthIncome, axis=1)
+        weeklyIncomeFeatures = self._transactions.apply(self.calculatePastWeekIncome, axis=1)
+        self._transactions = pd.merge(self._transactions, monthlyIncomeFeatures, weeklyIncomeFeatures, how='inner', on='id')
         print ""
