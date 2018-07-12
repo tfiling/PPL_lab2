@@ -4,6 +4,7 @@ import numpy as np
 import os.path as path
 from difflib import SequenceMatcher
 from sklearn.svm import SVC
+from sklearn import tree
 
 ###############################################
 # general porpuse
@@ -96,10 +97,20 @@ class UserModel:
         self.addSubscriptionFeatures()
 
     def trainModels(self, testUserModel):
-
-        # lst = ['accountId', 'amount', 'category', 'categoryId', 'createdAt', 'creditCardTransaction', 'date', 'id', 'location', 'name', 'paymentMeta', 'subscription', 'type', 'updatedAt', 'userId', 'categoryHash', 'isIncome', 'pastMonthIncome', 'pastMonthIncomeCount', 'pastMonthMax', 'pastMonthMean', 'pastMonthMin', 'pastMonthStd', 'currentMonthIncome', 'currentMonthIncomeCount', 'currentMonthMax', 'currentMonthMean', 'currentMonthMin', 'currentMonthStd']
         irrelevantColumns = ['__v', '_id', CATEGORY_HASH, ID, 'userId', DATE, 'createdAt', 'updatedAt', CATEGORY, 'location', 'paymentMeta', IS_SUBSCRIPTION, 'type', 'name', 'accountId']
-        # month
+
+        # subscription model
+        irrelevantColumns.append(IS_SUBSCRIPTION)
+        clf = tree.DecisionTreeClassifier()
+        x = self._subscriptionFeatures.drop(irrelevantColumns, axis=1)
+        y = self._subscriptionFeatures[IS_SUBSCRIPTION]
+        x1 = testUserModel._subscriptionFeatures.drop(irrelevantColumns, axis=1)
+        y1 = testUserModel._subscriptionFeatures[IS_SUBSCRIPTION]
+        clf.fit(x, y)
+        irrelevantColumns.remove(IS_SUBSCRIPTION)
+        print "test score for subscription labeling: ", clf.score(x1, y1)
+
+        # month model
         irrelevantColumns.append(TOTAL_MONTH_INCOME)
         self._monthModel = SVC(kernel='rbf')
         x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
