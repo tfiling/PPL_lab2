@@ -40,7 +40,7 @@ train, test, allTransactions = splitDataset(allTransactions)
 
 users = splitByID(train, test)
 for (trainUserModel, testUserModel) in users:
-    # print "training model for "
+    print "training model for user ", trainUserModel._userID
     trainUserModel.extractFeatures()
     testUserModel.extractFeatures()
     trainUserModel.trainModels(testUserModel)
