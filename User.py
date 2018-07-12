@@ -124,7 +124,11 @@ class UserModel:
             self._monthModel = SVC(kernel='rbf')
             x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
             y = self._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
-            self._monthModel.fit(x, y)
+            try:
+                self._monthModel.fit(x, y)
+            except:
+                y.ix[0] = y.ix[0] - 1
+                self._monthModel.fit(x, y)
 
         x1 = testUserModel._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
@@ -137,7 +141,11 @@ class UserModel:
             self._weekModel = SVC(kernel='rbf')
             x = self._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
             y = self._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
-            self._weekModel.fit(x, y)
+            try:
+                self._weekModel.fit(x, y)
+            except ValueError:
+                y.ix[0] = y.ix[0] - 1
+                self._weekModel.fit(x, y)
 
         x1 = testUserModel._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
@@ -188,7 +196,7 @@ class UserModel:
 
         return True
 
-    ################################################################################################
+################################################################################################
 ## income features
 ################################################################################################
 
