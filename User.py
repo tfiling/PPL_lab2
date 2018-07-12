@@ -3,10 +3,14 @@ import pandas as pd
 import numpy as np
 import os.path as path
 from difflib import SequenceMatcher
+from sklearn.svm import SVC
 
 ###############################################
 # general porpuse
 CACHE_FILE = 'CACHE_FILE.csv'
+DAY_OF_MONTH = 'dayOfMonth'
+MONTH = 'month'
+YEAR = 'year'
 
 
 ###############################################
@@ -65,7 +69,7 @@ ID = 'id'
 CATEGORY_HASH = 'categoryHash'
 NAME = 'name'
 
-class User:
+class UserModel:
 
     _userID = None
     _transactions = None
@@ -76,9 +80,10 @@ class User:
     _weekToIncome = {}
 
 
-    def __init__(self, userID, userTrainTransactions, userTestTransactions):
+    def __init__(self, userID, transactions):
         self._userID = userID
-        self._transactions = userTrainTransactions.sort_values(by=DATE)
+        self._transactions = transactions.sort_values(by=DATE)
+        self.addUtilityColumns()
         self._monthlyIncomeFeatures = pd.DataFrame(self._transactions)
         self._weeklyIncomeFeatures = pd.DataFrame(self._transactions)
         self._subscriptionFeatures = pd.DataFrame(self._transactions)
@@ -90,8 +95,29 @@ class User:
         self.addIncomeFeatures()
         self.addSubscriptionFeatures()
 
-    def trainModels(self):
+    def trainModels(self, testUserModel):
+
+        # lst = ['accountId', 'amount', 'category', 'categoryId', 'createdAt', 'creditCardTransaction', 'date', 'id', 'location', 'name', 'paymentMeta', 'subscription', 'type', 'updatedAt', 'userId', 'categoryHash', 'isIncome', 'pastMonthIncome', 'pastMonthIncomeCount', 'pastMonthMax', 'pastMonthMean', 'pastMonthMin', 'pastMonthStd', 'currentMonthIncome', 'currentMonthIncomeCount', 'currentMonthMax', 'currentMonthMean', 'currentMonthMin', 'currentMonthStd']
+        irrelevantColumns = ['__v', '_id', CATEGORY_HASH, ID, 'userId', DATE, 'createdAt', 'updatedAt', CATEGORY, 'location', 'paymentMeta', IS_SUBSCRIPTION, 'type', 'name', 'accountId']
+        irrelevantColumns.append(TOTAL_MONTH_INCOME)
+        clf = SVC(kernel='rbf')
+        x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
+        y = self._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
+        x1 = testUserModel._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
+        y1 = testUserModel._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
+        clf.fit(x, y)
+        print "test score for model:", clf.score(x1, y1)
+
         return
+
+
+    def addUtilityColumns(self):
+        for index, row in self._transactions.iterrows():
+            date = row[DATE]
+            date = date.isocalendar()
+            self._transactions.ix[index, DAY_OF_MONTH] = date[2]
+            self._transactions.ix[index, MONTH] = date[1]
+            self._transactions.ix[index, YEAR] = date[0]
 
 
 ################################################################################################
@@ -244,25 +270,24 @@ class User:
         return result
 
     def addIncomeFeatures(self):
+        self._transactions[IS_INCOME] = self._transactions.apply(lambda row: row[AMOUNT] < 0, axis=1)
         if path.isfile(self._cachFileMonth):
             self._monthlyIncomeFeatures = pd.read_csv(self._cachFileMonth, parse_dates=[DATE])
         else:
-            self._transactions[IS_INCOME] = self._transactions.apply(lambda row: row[AMOUNT] < 0, axis=1)
             pastMonthIncomeFeatures = self._transactions.apply(self.calculatePastMonthIncome, axis=1)
             currentMonthIncomeFeatures = self._transactions.apply(self.calculateCurrentMonthIncome, axis=1)
             self._monthlyIncomeFeatures = pd.merge(self._monthlyIncomeFeatures, pastMonthIncomeFeatures, how='inner', on=ID)
             self._monthlyIncomeFeatures = pd.merge(self._monthlyIncomeFeatures, currentMonthIncomeFeatures, how='inner', on=ID)
-            self._monthlyIncomeFeatures.to_csv(self._cachFileMonth)
+            self._monthlyIncomeFeatures.to_csv(self._cachFileMonth, index=False)
 
         if path.isfile(self._cachFileWeek):
             self._weeklyIncomeFeatures = pd.read_csv(self._cachFileWeek, parse_dates=[DATE])
         else:
-            self._transactions[IS_INCOME] = self._transactions.apply(lambda row: row[AMOUNT] < 0, axis=1)
             pastWeekIncomeFeatures = self._transactions.apply(self.calculatePastWeekIncome, axis=1)
             currentWeekIncomeFeatures = self._transactions.apply(self.calculateCurrentWeekIncome, axis=1)
             self._weeklyIncomeFeatures = pd.merge(self._weeklyIncomeFeatures, pastWeekIncomeFeatures, how='inner', on=ID)
             self._weeklyIncomeFeatures = pd.merge(self._weeklyIncomeFeatures, currentWeekIncomeFeatures, how='inner', on=ID)
-            self._weeklyIncomeFeatures.to_csv(self._cachFileWeek)
+            self._weeklyIncomeFeatures.to_csv(self._cachFileWeek, index=False)
 
 
 ################################################################################################
@@ -301,7 +326,7 @@ class User:
             return row[IS_SUBSCRIPTION]
 
         categories = row[CATEGORY_HASH]
-        relatedTransactions = self._transactions[self._transactions[CATEGORY_HASH] == categories]
+        relatedTransactions = self._subscriptionFeatures[self._subscriptionFeatures[CATEGORY_HASH] == categories]
         relatedTransactions = relatedTransactions.sort_values(by=DATE)
 
         if len(relatedTransactions) == 1:
@@ -321,7 +346,7 @@ class User:
 
         for i, currRow in relatedTransactions.iterrows():
             rowIsSubscription = categoryIsSubscription and abs(currRow[AMOUNT] - averageCost) <= 20
-            self._transactions[IS_SUBSCRIPTION] = rowIsSubscription
+            self._subscriptionFeatures[IS_SUBSCRIPTION] = rowIsSubscription
 
         currentRowIsSubscription = categoryIsSubscription and abs(row[AMOUNT] - averageCost) <= 20
         return currentRowIsSubscription
@@ -343,11 +368,11 @@ class User:
 
     def getIsSimilarAmountPastWeek(self, row):
         weekAgo = row[DATE] - timedelta(days=7)
-        return self.isSimilarAmount(self._transactions[self._transactions[DATE] == weekAgo], row[AMOUNT])
+        return self.isSimilarAmount(self._subscriptionFeatures[self._subscriptionFeatures[DATE] == weekAgo], row[AMOUNT])
 
     def getIsSimilarAmountPastMonth(self, row):
         monthAgo = row[DATE] - timedelta(days=30)
-        return self.isSimilarAmount(self._transactions[self._transactions[DATE] == monthAgo], row[AMOUNT])
+        return self.isSimilarAmount(self._subscriptionFeatures[self._subscriptionFeatures[DATE] == monthAgo], row[AMOUNT])
 
 
     @staticmethod
@@ -361,11 +386,11 @@ class User:
 
     def getIsSimilarCategoryPastWeek(self, row):
         weekAgo = row[DATE] - timedelta(days=7)
-        return self.isSimilarCategory(self._transactions[self._transactions[DATE] == weekAgo], row[CATEGORY_HASH])
+        return self.isSimilarCategory(self._subscriptionFeatures[self._subscriptionFeatures[DATE] == weekAgo], row[CATEGORY_HASH])
 
     def getIsSimilarCategoryPastMonth(self, row):
         monthAgo = row[DATE] - timedelta(days=30)
-        return self.isSimilarCategory(self._transactions[self._transactions[DATE] == monthAgo], row[CATEGORY_HASH])
+        return self.isSimilarCategory(self._subscriptionFeatures[self._subscriptionFeatures[DATE] == monthAgo], row[CATEGORY_HASH])
 
     # returns the highest similarity in range [0,1] from past week/month transactions
     @staticmethod
@@ -381,11 +406,11 @@ class User:
 
     def getNameSimilarityPastWeek(self, row):
         weekAgo = row[DATE] - timedelta(days=7)
-        return self.getTransactionNameSimilarity(self._transactions[self._transactions[DATE] == weekAgo], row[NAME])
+        return self.getTransactionNameSimilarity(self._subscriptionFeatures[self._subscriptionFeatures[DATE] == weekAgo], row[NAME])
 
     def getNameSimilarityPastMonth(self, row):
         monthAgo = row[DATE] - timedelta(days=30)
-        return self.getTransactionNameSimilarity(self._transactions[self._transactions[DATE] == monthAgo], row[NAME])
+        return self.getTransactionNameSimilarity(self._subscriptionFeatures[self._subscriptionFeatures[DATE] == monthAgo], row[NAME])
 
     def getRelatedTransactionByInterval(self, row, sortedTransactions, interval):
         date = row[DATE]
@@ -399,11 +424,11 @@ class User:
             return
 
         self._subscriptionFeatures[IS_SUBSCRIPTION] = np.nan
-        self._subscriptionFeatures[IS_SUBSCRIPTION] = self._transactions.apply(self.isSubscription, axis=1)
-        self._subscriptionFeatures[IS_PAST_WEEK_SIMILAR_AMOUNT] = self._transactions.apply(self.getIsSimilarAmountPastWeek, axis=1)
-        self._subscriptionFeatures[IS_PAST_MONTH_SIMILAR_AMOUNT] = self._transactions.apply(self.getIsSimilarAmountPastMonth, axis=1)
-        self._subscriptionFeatures[IS_PAST_WEEK_SIMILAR_CATEGORY] = self._transactions.apply(self.getIsSimilarCategoryPastWeek, axis=1)
-        self._subscriptionFeatures[IS_PAST_MONTH_SIMILAR_CATEGORY] = self._transactions.apply(self.getIsSimilarCategoryPastMonth, axis=1)
-        self._subscriptionFeatures[WEEK_INTERVAL_NAME_SIMILARITY] = self._transactions.apply(self.getNameSimilarityPastWeek, axis=1)
-        self._subscriptionFeatures[MONTH_INTERVAL_NAME_SIMILARITY] = self._transactions.apply(self.getNameSimilarityPastMonth, axis=1)
-        self._transactions.to_csv(self._cachFileSub)
+        self._subscriptionFeatures[IS_SUBSCRIPTION] = self._subscriptionFeatures.apply(self.isSubscription, axis=1)
+        self._subscriptionFeatures[IS_PAST_WEEK_SIMILAR_AMOUNT] = self._subscriptionFeatures.apply(self.getIsSimilarAmountPastWeek, axis=1)
+        self._subscriptionFeatures[IS_PAST_MONTH_SIMILAR_AMOUNT] = self._subscriptionFeatures.apply(self.getIsSimilarAmountPastMonth, axis=1)
+        self._subscriptionFeatures[IS_PAST_WEEK_SIMILAR_CATEGORY] = self._subscriptionFeatures.apply(self.getIsSimilarCategoryPastWeek, axis=1)
+        self._subscriptionFeatures[IS_PAST_MONTH_SIMILAR_CATEGORY] = self._subscriptionFeatures.apply(self.getIsSimilarCategoryPastMonth, axis=1)
+        self._subscriptionFeatures[WEEK_INTERVAL_NAME_SIMILARITY] = self._subscriptionFeatures.apply(self.getNameSimilarityPastWeek, axis=1)
+        self._subscriptionFeatures[MONTH_INTERVAL_NAME_SIMILARITY] = self._subscriptionFeatures.apply(self.getNameSimilarityPastMonth, axis=1)
+        self._subscriptionFeatures.to_csv(self._cachFileSub, index=False)

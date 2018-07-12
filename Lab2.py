@@ -1,7 +1,7 @@
 import hashlib
 import pandas as pd
 import numpy as np
-from User import User
+from User import UserModel
 
 
 # TODO test query for missing user
@@ -11,8 +11,9 @@ def splitByID(train, test):
     for userID in userIDs:
         userTrainTransactions = train.loc[train.userId == userID]
         userTestTransactions = test.loc[test.userId == userID]
-        newUser = User(userID, userTrainTransactions, userTestTransactions)
-        users.append(newUser)
+        trainUserModel = UserModel(userID, userTrainTransactions)
+        testUserModel = UserModel(userID, userTestTransactions)
+        users.append((trainUserModel, testUserModel))
 
     return users
 
@@ -38,8 +39,11 @@ allTransactions['categoryHash'] = allTransactions.apply(calculateCategoriesHash,
 train, test, allTransactions = splitDataset(allTransactions)
 
 users = splitByID(train, test)
-for user in users:
-    user.extractFeatures()
+for (trainUserModel, testUserModel) in users:
+    # print "training model for "
+    trainUserModel.extractFeatures()
+    testUserModel.extractFeatures()
+    trainUserModel.trainModels(testUserModel)
 
 print ""
 
