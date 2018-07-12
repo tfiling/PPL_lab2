@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 import pandas as pd
 import numpy as np
 import os.path as path
@@ -37,6 +37,8 @@ CURRENT_MONTH_MEAN = 'currentMonthMean'
 CURRENT_WEEK_MEAN = 'currentWeekMean'
 CURRENT_MONTH_STD = 'currentMonthStd'
 CURRENT_WEEK_STD = 'currentWeekStd'
+TOTAL_MONTH_INCOME = 'totalIncomeByEndOfMonth'
+TOTAL_WEEK_INCOME = 'totalIncomeByEndOfWeek'
 
 ###############################################
 # subscription feature column names
@@ -70,8 +72,8 @@ class User:
     _cach_file = ''
     _pastMonthFeatures = {}
     _pastWeekFeatures = {}
-    _currentMonthFeatures = {}
-    _currentWeekFeatures = {}
+    _monthToIncome = {}
+    _weekToIncome = {}
 
 
     def __init__(self, userID, userTrainTransactions, userTestTransactions):
@@ -80,7 +82,6 @@ class User:
         self._monthlyIncomeFeatures = pd.DataFrame(self._transactions)
         self._weeklyIncomeFeatures = pd.DataFrame(self._transactions)
         self._subscriptionFeatures = pd.DataFrame(self._transactions)
-        self._testTransactions
         self._cachFileWeek = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_week'
         self._cachFileMonth = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_month'
         self._cachFileSub = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_sub'
@@ -97,29 +98,49 @@ class User:
 ## income features
 ################################################################################################
 
+    @staticmethod
+    def zeroAllFeatures(keys):
+        result = {}
+        for key in keys:
+            result[key] = 0
+
+        return pd.Series(result)
+
 #######################################
 ## past month / week features
 #######################################
 
     def calculatePastMonthIncome(self, row):
         date = row[DATE]
-        date = date.replace(day=1)
-        lastDay = date - timedelta(days=1)
+        lastDay = date.replace(day=1)
+        lastDay = lastDay - timedelta(days=1)
         firstDay = lastDay.replace(day=1)
         if not self._pastMonthFeatures.has_key(firstDay):
             lastMonthIncome = self._transactions[self._transactions[DATE] >= firstDay][self._transactions[DATE] <= lastDay]
-            lastMonthIncome = lastMonthIncome[lastMonthIncome[IS_INCOME]][AMOUNT]
-            series = pd.Series(
-                {
-                    PAST_MONTH_INCOME: lastMonthIncome.sum(),
-                    PAST_MONTH_INCOME_COUNT: len(lastMonthIncome),
-                    # the income is negative therefore min reslted from max and vice versa
-                    PAST_MONTH_MAX: lastMonthIncome.min(),
-                    PAST_MONTH_MIN: lastMonthIncome.max(),
-                    PAST_MONTH_MEAN: lastMonthIncome.mean(),
-                    PAST_MONTH_STD: lastMonthIncome.std()
-                })
-            self._pastMonthFeatures[firstDay] = series.fillna(0)
+            if len(lastMonthIncome) > 0:
+                lastMonthIncome = lastMonthIncome[lastMonthIncome[IS_INCOME]][AMOUNT]
+                series = pd.Series(
+                    {
+                        PAST_MONTH_INCOME: lastMonthIncome.sum(),
+                        PAST_MONTH_INCOME_COUNT: len(lastMonthIncome),
+                        # the income is negative therefore min reslted from max and vice versa
+                        PAST_MONTH_MAX: lastMonthIncome.min(),
+                        PAST_MONTH_MIN: lastMonthIncome.max(),
+                        PAST_MONTH_MEAN: lastMonthIncome.mean(),
+                        PAST_MONTH_STD: lastMonthIncome.std()
+                    })
+                series = series.fillna(0)
+            else:
+                series = self.zeroAllFeatures([
+                        PAST_MONTH_INCOME,
+                        PAST_MONTH_INCOME_COUNT,
+                        PAST_MONTH_MAX,
+                        PAST_MONTH_MIN,
+                        PAST_MONTH_MEAN,
+                        PAST_MONTH_STD
+                    ])
+
+            self._pastMonthFeatures[firstDay] = series
 
         result = pd.Series(self._pastMonthFeatures[firstDay])
         result[ID] = row[ID]
@@ -132,21 +153,32 @@ class User:
         lastDay = date - timedelta(days=day)
         if not self._pastWeekFeatures.has_key(firstDay):
             lastWeekIncome = self._transactions[self._transactions[DATE] >= firstDay][self._transactions[DATE] <= lastDay]
-            lastWeekIncome = lastWeekIncome[lastWeekIncome[IS_INCOME]][AMOUNT]
-            series = pd.Series(
-                {
-                    PAST_WEEK_INCOME: lastWeekIncome.sum(),
-                    PAST_WEEK_INCOME_COUNT: len(lastWeekIncome),
-                    # the income is negative therefore min reslted from max and vice versa
-                    PAST_WEEK_MAX: lastWeekIncome.min(),
-                    PAST_WEEK_MIN: lastWeekIncome.max(),
-                    PAST_WEEK_MEAN: lastWeekIncome.mean(),
-                    PAST_WEEK_STD: lastWeekIncome.std()
+            if len(lastWeekIncome) > 0 and len(lastWeekIncome[lastWeekIncome[IS_INCOME]]):
+                lastWeekIncome = lastWeekIncome[lastWeekIncome[IS_INCOME]][AMOUNT]
+                series = pd.Series(
+                    {
+                        PAST_WEEK_INCOME: lastWeekIncome.sum(),
+                        PAST_WEEK_INCOME_COUNT: len(lastWeekIncome),
+                        # the income is negative therefore min reslted from max and vice versa
+                        PAST_WEEK_MAX: lastWeekIncome.min(),
+                        PAST_WEEK_MIN: lastWeekIncome.max(),
+                        PAST_WEEK_MEAN: lastWeekIncome.mean(),
+                        PAST_WEEK_STD: lastWeekIncome.std()
 
-                })
-            self._pastWeekFeatures[firstDay] = series.fillna(0)
+                    })
+                series = series.fillna(0)
+            else:
+                series = self.zeroAllFeatures([
+                        PAST_WEEK_INCOME,
+                        PAST_WEEK_INCOME_COUNT,
+                        PAST_WEEK_MAX,
+                        PAST_WEEK_MIN,
+                        PAST_WEEK_MEAN,
+                        PAST_WEEK_STD
+                    ])
+            self._pastWeekFeatures[firstDay] = series
 
-        result = pd.Series(self._pastWeekFeatures[firstDay])
+        result = self._pastWeekFeatures[firstDay]
         result[ID] = row[ID]
         return result
 
@@ -157,22 +189,28 @@ class User:
     def calculateCurrentMonthIncome(self, row):
         date = row[DATE]
         firstDay = date.replace(day=1)
-        if not self._currentMonthFeatures.has_key(firstDay):
-            monthIncome = self._transactions[self._transactions[DATE] >= firstDay][self._transactions[DATE] <= date]
-            monthIncome = monthIncome[monthIncome[IS_INCOME]][AMOUNT]
-            series = pd.Series(
-                {
-                    CURRENT_MONTH_INCOME: monthIncome.sum(),
-                    CURRENT_MONTH_INCOME_COUNT: len(monthIncome),
-                    # the income is negative therefore min reslted from max and vice versa
-                    CURRENT_MONTH_MAX: monthIncome.min(),
-                    CURRENT_MONTH_MIN: monthIncome.max(),
-                    CURRENT_MONTH_MEAN: monthIncome.mean(),
-                    CURRENT_WEEK_STD: monthIncome.std()
-                })
-            self._currentMonthFeatures[firstDay] = series.fillna(0)
+        monthIncome = self._transactions[self._transactions[DATE] >= firstDay][self._transactions[DATE] <= date]
+        monthIncome = monthIncome[monthIncome[IS_INCOME]][AMOUNT]
+        result = pd.Series(
+            {
+                CURRENT_MONTH_INCOME: monthIncome.sum(),
+                CURRENT_MONTH_INCOME_COUNT: len(monthIncome),
+                # the income is negative therefore min reslted from max and vice versa
+                CURRENT_MONTH_MAX: monthIncome.min(),
+                CURRENT_MONTH_MIN: monthIncome.max(),
+                CURRENT_MONTH_MEAN: monthIncome.mean(),
+                CURRENT_MONTH_STD: monthIncome.std()
+            })
+        result = result.fillna(0)
 
-        result = pd.Series(self._currentMonthFeatures[firstDay])
+        if not self._monthToIncome.has_key(firstDay):
+            lastDay = firstDay + timedelta(days=31)
+            lastDay = lastDay.replace(day=1)
+            monthIncome = self._transactions[self._transactions[DATE] >= firstDay][self._transactions[DATE] <= lastDay]
+            monthIncome = monthIncome[monthIncome[IS_INCOME]][AMOUNT]
+            self._monthToIncome[firstDay] = monthIncome.sum()
+
+        result[TOTAL_MONTH_INCOME] = self._monthToIncome[firstDay]
         result[ID] = row[ID]
         return result
 
@@ -180,23 +218,28 @@ class User:
         date = row[DATE]
         day = date.isocalendar()[2]
         firstDay = date - timedelta(days=day - 1)
-        if not self._currentWeekFeatures.has_key(firstDay):
+        weekIncome = self._transactions[self._transactions[DATE] >= firstDay][self._transactions[DATE] <= date]
+        weekIncome = weekIncome[weekIncome[IS_INCOME]][AMOUNT]
+        series = pd.Series(
+            {
+                CURRENT_WEEK_INCOME: weekIncome.sum(),
+                CURRENT_WEEK_INCOME_COUNT: len(weekIncome),
+                # the income is negative therefore min reslted from max and vice versa
+                CURRENT_WEEK_MAX: weekIncome.min(),
+                CURRENT_WEEK_MIN: weekIncome.max(),
+                CURRENT_WEEK_MEAN: weekIncome.mean(),
+                CURRENT_WEEK_STD: weekIncome.std()
+
+            })
+        result = series.fillna(0)
+
+        if not self._weekToIncome.has_key(firstDay):
+            lastDay = date + timedelta(days=7 - day)
             weekIncome = self._transactions[self._transactions[DATE] >= firstDay][self._transactions[DATE] <= date]
             weekIncome = weekIncome[weekIncome[IS_INCOME]][AMOUNT]
-            series = pd.Series(
-                {
-                    CURRENT_WEEK_INCOME: weekIncome.sum(),
-                    CURRENT_WEEK_INCOME_COUNT: len(weekIncome),
-                    # the income is negative therefore min reslted from max and vice versa
-                    CURRENT_WEEK_MAX: weekIncome.min(),
-                    CURRENT_WEEK_MIN: weekIncome.max(),
-                    CURRENT_WEEK_MEAN: weekIncome.mean(),
-                    CURRENT_WEEK_STD: weekIncome.std()
+            self._weekToIncome[firstDay] = weekIncome.sum()
 
-                })
-            self._currentWeekFeatures[firstDay] = series.fillna(0)
-
-        result = pd.Series(self._currentWeekFeatures[firstDay])
+        result[TOTAL_WEEK_INCOME] = self._weekToIncome[firstDay]
         result[ID] = row[ID]
         return result
 
@@ -214,6 +257,7 @@ class User:
         if path.isfile(self._cachFileWeek):
             self._weeklyIncomeFeatures = pd.read_csv(self._cachFileWeek, parse_dates=[DATE])
         else:
+            self._transactions[IS_INCOME] = self._transactions.apply(lambda row: row[AMOUNT] < 0, axis=1)
             pastWeekIncomeFeatures = self._transactions.apply(self.calculatePastWeekIncome, axis=1)
             currentWeekIncomeFeatures = self._transactions.apply(self.calculateCurrentWeekIncome, axis=1)
             self._weeklyIncomeFeatures = pd.merge(self._weeklyIncomeFeatures, pastWeekIncomeFeatures, how='inner', on=ID)
@@ -279,7 +323,7 @@ class User:
             rowIsSubscription = categoryIsSubscription and abs(currRow[AMOUNT] - averageCost) <= 20
             self._transactions[IS_SUBSCRIPTION] = rowIsSubscription
 
-        currentRowIsSubscription = categoryIsSubscription and abs(currRow[AMOUNT] - averageCost) <= 20
+        currentRowIsSubscription = categoryIsSubscription and abs(row[AMOUNT] - averageCost) <= 20
         return currentRowIsSubscription
 
 
