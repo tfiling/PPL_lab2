@@ -5,6 +5,7 @@ import os.path as path
 from difflib import SequenceMatcher
 from sklearn.svm import SVC
 from sklearn import tree
+import pickle
 
 ###############################################
 # general porpuse
@@ -91,46 +92,60 @@ class UserModel:
         self._cachFileWeek = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_week'
         self._cachFileMonth = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_month'
         self._cachFileSub = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_sub'
+        self._WeeklyIncomeModelCache = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_week_model'
+        self._monthlyIncomeModelCache = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_month_model'
+        self._subscriptionModelCache = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_sub_model'
 
     def extractFeatures(self):
         self.addIncomeFeatures()
         self.addSubscriptionFeatures()
 
     def trainModels(self, testUserModel):
+        alreadyTrained = self.loadSavedModels()
+
         irrelevantColumns = ['__v', '_id', CATEGORY_HASH, ID, 'userId', DATE, 'createdAt', 'updatedAt', CATEGORY, 'location', 'paymentMeta', IS_SUBSCRIPTION, 'type', 'name', 'accountId']
 
         # subscription model
         irrelevantColumns.append(IS_SUBSCRIPTION)
-        clf = tree.DecisionTreeClassifier()
-        x = self._subscriptionFeatures.drop(irrelevantColumns, axis=1)
-        y = self._subscriptionFeatures[IS_SUBSCRIPTION]
+        if not alreadyTrained:
+            self._subscriptionModel = tree.DecisionTreeClassifier()
+            x = self._subscriptionFeatures.drop(irrelevantColumns, axis=1)
+            y = self._subscriptionFeatures[IS_SUBSCRIPTION]
+            self._subscriptionModel.fit(x, y)
+
         x1 = testUserModel._subscriptionFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._subscriptionFeatures[IS_SUBSCRIPTION]
-        clf.fit(x, y)
+        print "test score for subscription labeling: ", self._subscriptionModel.score(x1, y1)
         irrelevantColumns.remove(IS_SUBSCRIPTION)
-        print "test score for subscription labeling: ", clf.score(x1, y1)
 
         # month model
         irrelevantColumns.append(TOTAL_MONTH_INCOME)
-        self._monthModel = SVC(kernel='rbf')
-        x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
-        y = self._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
+        if not alreadyTrained:
+            self._monthModel = SVC(kernel='rbf')
+            x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
+            y = self._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
+            self._monthModel.fit(x, y)
+
         x1 = testUserModel._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
-        self._monthModel.fit(x, y)
         print "test score for monthly income model:", self._monthModel.score(x1, y1)
         irrelevantColumns.remove(TOTAL_MONTH_INCOME)
 
         # week
         irrelevantColumns.append(TOTAL_WEEK_INCOME)
-        self._weekModel = SVC(kernel='rbf')
-        x = self._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
-        y = self._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
+        if not alreadyTrained:
+            self._weekModel = SVC(kernel='rbf')
+            x = self._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
+            y = self._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
+            self._weekModel.fit(x, y)
+
         x1 = testUserModel._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
-        self._weekModel.fit(x, y)
         print "test score for weekly income model:", self._weekModel.score(x1, y1)
         irrelevantColumns.remove(TOTAL_WEEK_INCOME)
+
+        if not alreadyTrained:
+            self.saveModels()
 
 
     def addUtilityColumns(self):
@@ -141,8 +156,39 @@ class UserModel:
             self._transactions.ix[index, MONTH] = date[1]
             self._transactions.ix[index, YEAR] = date[0]
 
+    def saveModels(self):
+        pickleWriter = open(self._WeeklyIncomeModelCache, 'wb')
+        pickle.dump(self._weekModel, pickleWriter)
+        pickleWriter.close()
 
-################################################################################################
+        pickleWriter = open(self._monthlyIncomeModelCache, 'wb')
+        pickle.dump(self._monthModel, pickleWriter)
+        pickleWriter.close()
+
+        pickleWriter = open(self._subscriptionModelCache, 'wb')
+        pickle.dump(self._subscriptionModel, pickleWriter)
+        pickleWriter.close()
+
+
+    def loadSavedModels(self):
+        if not path.isfile(self._WeeklyIncomeModelCache) or not path.isfile(self._monthlyIncomeModelCache) or not path.isfile(self._subscriptionModelCache):
+            return False
+
+        pickleReader = open(self._WeeklyIncomeModelCache, 'r')
+        self._weekModel = pickle.load(pickleReader)
+        pickleReader.close()
+
+        pickleReader = open(self._monthlyIncomeModelCache, 'r')
+        self._monthModel = pickle.load(pickleReader)
+        pickleReader.close()
+
+        pickleReader = open(self._subscriptionModelCache, 'r')
+        self._subscriptionModel = pickle.load(pickleReader)
+        pickleReader.close()
+
+        return True
+
+    ################################################################################################
 ## income features
 ################################################################################################
 
