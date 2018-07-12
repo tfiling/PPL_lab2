@@ -99,16 +99,27 @@ class UserModel:
 
         # lst = ['accountId', 'amount', 'category', 'categoryId', 'createdAt', 'creditCardTransaction', 'date', 'id', 'location', 'name', 'paymentMeta', 'subscription', 'type', 'updatedAt', 'userId', 'categoryHash', 'isIncome', 'pastMonthIncome', 'pastMonthIncomeCount', 'pastMonthMax', 'pastMonthMean', 'pastMonthMin', 'pastMonthStd', 'currentMonthIncome', 'currentMonthIncomeCount', 'currentMonthMax', 'currentMonthMean', 'currentMonthMin', 'currentMonthStd']
         irrelevantColumns = ['__v', '_id', CATEGORY_HASH, ID, 'userId', DATE, 'createdAt', 'updatedAt', CATEGORY, 'location', 'paymentMeta', IS_SUBSCRIPTION, 'type', 'name', 'accountId']
+        # month
         irrelevantColumns.append(TOTAL_MONTH_INCOME)
-        clf = SVC(kernel='rbf')
+        self._monthModel = SVC(kernel='rbf')
         x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y = self._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
         x1 = testUserModel._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
-        clf.fit(x, y)
-        print "test score for model:", clf.score(x1, y1)
+        self._monthModel.fit(x, y)
+        print "test score for monthly income model:", self._monthModel.score(x1, y1)
+        irrelevantColumns.remove(TOTAL_MONTH_INCOME)
 
-        return
+        # week
+        irrelevantColumns.append(TOTAL_WEEK_INCOME)
+        self._weekModel = SVC(kernel='rbf')
+        x = self._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
+        y = self._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
+        x1 = testUserModel._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
+        y1 = testUserModel._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
+        self._weekModel.fit(x, y)
+        print "test score for weekly income model:", self._weekModel.score(x1, y1)
+        irrelevantColumns.remove(TOTAL_WEEK_INCOME)
 
 
     def addUtilityColumns(self):
