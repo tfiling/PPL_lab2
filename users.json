@@ -1,0 +1,847 @@
+{ 
+    "_id" : ObjectId("5b104f96607dfa2bffc3da6e"), 
+    "addresses" : [
+        {
+            "accounts" : [
+
+            ], 
+            "data" : {
+                "city" : "ABBOTSFORD", 
+                "state" : "BC", 
+                "street" : "UNIT A, 33790 ESSENDENE AVE", 
+                "zip" : "V2S2H2"
+            }, 
+            "primary" : true
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "bog309@gmail.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }
+    ], 
+    "names" : [
+        "CAMERON PETERSON"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "604-825-4830", 
+            "primary" : true, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "604-556-6228", 
+            "primary" : false, 
+            "type" : "work"
+        }
+    ], 
+    "id" : "364JoenZ6ztoPOrj8RaNFgK3MLkX5ksKEbnMJ", 
+    "isSandboxUser" : false, 
+    "createdAt" : ISODate("2018-05-31T19:40:06.031+0000"), 
+    "updatedAt" : ISODate("2018-05-31T19:40:06.031+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b15747c607dfa2bffc3dad4"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "ye6M3Ev6yZFv7Q7Xwqkki3EQNGGmAzHyax4Md", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-04T17:18:52.217+0000"), 
+    "updatedAt" : ISODate("2018-06-04T17:18:52.217+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b17c774607dfa2bffc3db1e"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "dkzRnZovN9F8b5y7LDg4Fjg5GL9KKMuZNMZkb", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-06T11:37:24.415+0000"), 
+    "updatedAt" : ISODate("2018-06-06T11:37:24.415+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b17cbb1607dfa2bffc3db69"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "aANA7mQ5oVCD7l4wEnWViBrmp5ZXQWc74XxGK", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-06T11:55:29.564+0000"), 
+    "updatedAt" : ISODate("2018-06-06T11:55:29.564+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b17cc57607dfa2bffc3dbb4"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "91aV7k4xKxt8wx7waDxnfyMddLdWglSR8GRve", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-06T11:58:15.238+0000"), 
+    "updatedAt" : ISODate("2018-06-06T11:58:15.238+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b183ce2607dfa2bffc3dbff"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "8dMKEdomy9SownJN6E1Xfl8qrkvN9Kuw1RnKm", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-06T19:58:26.003+0000"), 
+    "updatedAt" : ISODate("2018-06-06T19:58:26.003+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b197b30607dfa2bffc3dc4a"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "bGBxKeGjQAiAEG9nmj4vTeeErMlzG7TVLpX4n", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-07T18:36:32.290+0000"), 
+    "updatedAt" : ISODate("2018-06-07T18:36:32.290+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b198d67607dfa2bffc3dc95"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "XxodbvobEahKZXb4J11ohoBZrvAnpLHdgAmga", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-07T19:54:15.339+0000"), 
+    "updatedAt" : ISODate("2018-06-07T19:54:15.339+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b19b602607dfa2bffc3dce0"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "8d4rxzpj8Ahol3JrWjyRH8z9nMrLZnFwaoyMX", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-07T22:47:30.527+0000"), 
+    "updatedAt" : ISODate("2018-06-07T22:47:30.527+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b1ce1ab607dfa2bffc3dd2b"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "Za7Q3pELxJHGnoGjGXBLcJ1X9AoklKCgKkbXJ", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-10T08:30:35.483+0000"), 
+    "updatedAt" : ISODate("2018-06-10T08:30:35.483+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b1d7f10607dfa2bffc3dd79"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "1Kr8v66mAoTlG13P9j8ZUmPN7l3vP1t5gEn7p", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-10T19:42:08.690+0000"), 
+    "updatedAt" : ISODate("2018-06-10T19:42:08.690+0000"), 
+    "__v" : NumberInt(0)
+}
+{ 
+    "_id" : ObjectId("5b1fb652607dfa2bffc3ddc6"), 
+    "addresses" : [
+        {
+            "accounts" : [
+                "Plaid Checking 0000", 
+                "Plaid Saving 1111", 
+                "Plaid CD 2222"
+            ], 
+            "data" : {
+                "city" : "Malakoff", 
+                "state" : "NY", 
+                "street" : "2992 Cameron Road", 
+                "zip" : "14236"
+            }, 
+            "primary" : true
+        }, 
+        {
+            "accounts" : [
+                "Plaid Credit Card 3333"
+            ], 
+            "data" : {
+                "city" : "San Matias", 
+                "state" : "CA", 
+                "street" : "2493 Leisure Lane", 
+                "zip" : "93405-2255"
+            }, 
+            "primary" : false
+        }
+    ], 
+    "emails" : [
+        {
+            "data" : "accountholder0@example.com", 
+            "primary" : true, 
+            "type" : "primary"
+        }, 
+        {
+            "data" : "accountholder1@example.com", 
+            "primary" : false, 
+            "type" : "secondary"
+        }, 
+        {
+            "data" : "extraordinarily.long.email.username.123456@reallylonghostname.com", 
+            "primary" : false, 
+            "type" : "other"
+        }
+    ], 
+    "names" : [
+        "Alberta Bobbeth Charleson"
+    ], 
+    "phoneNumbers" : [
+        {
+            "data" : "1112223333", 
+            "primary" : false, 
+            "type" : "home"
+        }, 
+        {
+            "data" : "1112224444", 
+            "primary" : false, 
+            "type" : "work"
+        }, 
+        {
+            "data" : "1112225555", 
+            "primary" : false, 
+            "type" : "mobile1"
+        }
+    ], 
+    "id" : "JDEblQjgkWcZjR1ma98xHQnxpW9LQahdEvkR6", 
+    "isSandboxUser" : true, 
+    "createdAt" : ISODate("2018-06-12T12:02:26.266+0000"), 
+    "updatedAt" : ISODate("2018-06-12T12:02:26.266+0000"), 
+    "__v" : NumberInt(0)
+}
