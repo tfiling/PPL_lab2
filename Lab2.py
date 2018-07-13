@@ -61,27 +61,23 @@ app = Flask(__name__)
 @app.route('/', methods=['POST'])
 def analyze():
     transaction = request.get_json()['trans']
-    try:
-        transaction = pd.DataFrame.from_dict([transaction]).iloc[0]
-        userID = transaction['userId']
-        category = transaction['category']
-        sha1 = hashlib.sha1()
-        sha1.update(str(category))
-        transaction['categoryHash'] = sha1.hexdigest()
-        dateType = type(transaction['date'])
-        if dateType == str or dateType == unicode:
-            transaction['date'] = datetime.strptime(transaction['date'], "%Y-%m-%d")
-        if IDToUserModel.has_key(userID):
-            userModel = IDToUserModel[userID]
-        else:
-            userID = IDToUserModel.keys()[0]
-            userModel = IDToUserModel[userID]
+    transaction = pd.DataFrame.from_dict([transaction]).iloc[0]
+    userID = transaction['userId']
+    category = transaction['category']
+    sha1 = hashlib.sha1()
+    sha1.update(str(category))
+    transaction['categoryHash'] = sha1.hexdigest()
+    dateType = type(transaction['date'])
+    if dateType == str or dateType == unicode:
+        transaction['date'] = datetime.strptime(transaction['date'], "%Y-%m-%d")
+    if IDToUserModel.has_key(userID):
+        userModel = IDToUserModel[userID]
+    else:
+        userID = IDToUserModel.keys()[0]
+        userModel = IDToUserModel[userID]
 
-        result = userModel.predict(transaction)
-        return jsonify(result)
-    except:
-        print "failed hadling json. please use similiar request to <file>"
-        return jsonify([])
+    result = userModel.predict(transaction)
+    return jsonify(result)
 
 
 if __name__ == '__main__':
