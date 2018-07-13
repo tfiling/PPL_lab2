@@ -100,13 +100,20 @@ class UserModel:
         self.addIncomeFeatures()
         self.addSubscriptionFeatures()
 
+################################################################################################
+## train model
+################################################################################################
+
+    def getIrrelevantColumns(self, additional):
+        return ['__v', '_id', CATEGORY_HASH, ID, 'userId', DATE, 'createdAt', 'updatedAt', CATEGORY,
+                             'location', 'paymentMeta', IS_SUBSCRIPTION, 'type', 'name', 'accountId', additional]
+
+
     def trainModels(self, testUserModel):
         alreadyTrained = self.loadSavedModels()
 
-        irrelevantColumns = ['__v', '_id', CATEGORY_HASH, ID, 'userId', DATE, 'createdAt', 'updatedAt', CATEGORY, 'location', 'paymentMeta', IS_SUBSCRIPTION, 'type', 'name', 'accountId']
-
         # subscription model
-        irrelevantColumns.append(IS_SUBSCRIPTION)
+        irrelevantColumns = self.getIrrelevantColumns(IS_SUBSCRIPTION)
         if not alreadyTrained:
             self._subscriptionModel = tree.DecisionTreeClassifier()
             x = self._subscriptionFeatures.drop(irrelevantColumns, axis=1)
@@ -116,10 +123,9 @@ class UserModel:
         x1 = testUserModel._subscriptionFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._subscriptionFeatures[IS_SUBSCRIPTION]
         print "test score for subscription labeling: ", self._subscriptionModel.score(x1, y1)
-        irrelevantColumns.remove(IS_SUBSCRIPTION)
 
         # month model
-        irrelevantColumns.append(TOTAL_MONTH_INCOME)
+        irrelevantColumns = self.getIrrelevantColumns(TOTAL_MONTH_INCOME)
         if not alreadyTrained:
             self._monthModel = SVC(kernel='rbf')
             x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
@@ -133,10 +139,9 @@ class UserModel:
         x1 = testUserModel._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
         print "test score for monthly income model:", self._monthModel.score(x1, y1)
-        irrelevantColumns.remove(TOTAL_MONTH_INCOME)
 
         # week
-        irrelevantColumns.append(TOTAL_WEEK_INCOME)
+        irrelevantColumns = self.getIrrelevantColumns(TOTAL_WEEK_INCOME)
         if not alreadyTrained:
             self._weekModel = SVC(kernel='rbf')
             x = self._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
@@ -150,7 +155,6 @@ class UserModel:
         x1 = testUserModel._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
         print "test score for weekly income model:", self._weekModel.score(x1, y1)
-        irrelevantColumns.remove(TOTAL_WEEK_INCOME)
 
         if not alreadyTrained:
             self.saveModels()
@@ -195,6 +199,39 @@ class UserModel:
         pickleReader.close()
 
         return True
+
+################################################################################################
+## predict
+################################################################################################
+
+    def predict(self, transaction):
+        transactionID = transaction['id']
+        transactions = self._originalTransactions
+        if len(transactions[transactions['id'] == transactionID]) == 0:
+            transactions = transactions.append(pd.Series(transaction), ignore_index=True)
+        user = UserModel(self._userID, transactions)
+        user.extractFeatures()
+        subscriptionFeatures = user._subscriptionFeatures[user._subscriptionFeatures[ID] == transactionID]
+        irrelevantColumns = self.getIrrelevantColumns(IS_SUBSCRIPTION)
+        subscriptionFeatures = subscriptionFeatures.drop(irrelevantColumns, axis=0)
+        monthlyIncomeFeatures = user._monthlyIncomeFeatures[user._monthlyIncomeFeatures[ID] == transactionID]
+        irrelevantColumns = self.getIrrelevantColumns(TOTAL_MONTH_INCOME)
+        monthlyIncomeFeatures = monthlyIncomeFeatures.drop(irrelevantColumns, axis=0)
+        weeklyIncomeFeatures = user._weeklyIncomeFeatures[user._weeklyIncomeFeatures[ID] == transactionID]
+        irrelevantColumns = self.getIrrelevantColumns(TOTAL_WEEK_INCOME)
+        weeklyIncomeFeatures = weeklyIncomeFeatures.drop(irrelevantColumns, axis=0)
+
+        predictedIsSubscription = abs(self._subscriptionModel.predict(subscriptionFeatures))
+        predictedMonthlyIncome = abs(self._monthModel.predict(monthlyIncomeFeatures))
+        predictedWeeklyIncome = abs(self._weekModel.predict(weeklyIncomeFeatures))
+
+        return {
+            "subscription": predictedIsSubscription,
+            "weeklyIncome": predictedMonthlyIncome,
+            "monthlyIncome": predictedWeeklyIncome
+        }
+
+
 
 ################################################################################################
 ## income features

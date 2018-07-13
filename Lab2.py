@@ -2,6 +2,12 @@ import hashlib
 import pandas as pd
 import numpy as np
 from User import UserModel
+from flask import Flask
+from flask import jsonify
+from flask import request
+from datetime import datetime
+
+IDToUserModel = {}
 
 
 # TODO test query for missing user
@@ -32,19 +38,53 @@ def splitDataset(allTransactions):
     test = allTransactions[~mask]
     return train, test, allTransactions
 
+if __name__ == '__main__':
+    print "running models creation using the file transactions_clean.txt that was published in moodle"
+    allTransactions = pd.read_json("transactions_clean.txt")
+    allTransactions['categoryHash'] = allTransactions.apply(calculateCategoriesHash, axis=1)
+    train, test, allTransactions = splitDataset(allTransactions)
+
+    users = splitByID(train, test)
+    print "detected ", len(users), " users."
+    i = 0
+    for (trainUserModel, testUserModel) in users:
+        i += 1
+        print i, ") training model for user ", trainUserModel._userID
+        trainUserModel.extractFeatures()
+        testUserModel.extractFeatures()
+        trainUserModel.trainModels(testUserModel)
+        IDToUserModel[trainUserModel._userID] = trainUserModel
+
+app = Flask(__name__)
 
 
-allTransactions = pd.read_json("transactions_clean.txt")
-allTransactions['categoryHash'] = allTransactions.apply(calculateCategoriesHash, axis=1)
-train, test, allTransactions = splitDataset(allTransactions)
+@app.route('/', methods=['POST'])
+def analyze():
+    transaction = request.get_json()['trans']
+    try:
+        transaction = pd.DataFrame.from_dict([transaction]).iloc[0]
+        userID = transaction['userId']
+        category = transaction['category']
+        sha1 = hashlib.sha1()
+        sha1.update(str(category))
+        transaction['categoryHash'] = sha1.hexdigest()
+        dateType = type(transaction['date'])
+        if dateType == str or dateType == unicode:
+            transaction['date'] = datetime.strptime(transaction['date'], "%Y-%m-%d")
+        if IDToUserModel.has_key(userID):
+            userModel = IDToUserModel[userID]
+        else:
+            userID = IDToUserModel.keys()[0]
+            userModel = IDToUserModel[userID]
 
-users = splitByID(train, test)
-for (trainUserModel, testUserModel) in users:
-    print "training model for user ", trainUserModel._userID
-    trainUserModel.extractFeatures()
-    testUserModel.extractFeatures()
-    trainUserModel.trainModels(testUserModel)
+        result = userModel.predict(transaction)
+        return jsonify(result)
+    except:
+        print "failed hadling json. please use similiar request to <file>"
+        return jsonify([])
 
-print ""
+
+if __name__ == '__main__':
+    app.run(debug=False)
 
 
