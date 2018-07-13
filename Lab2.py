@@ -9,8 +9,6 @@ from datetime import datetime
 
 IDToUserModel = {}
 
-
-# TODO test query for missing user
 def splitByID(train, test):
     userIDs = train['userId'].unique().tolist()
     users = []
@@ -32,7 +30,7 @@ def calculateCategoriesHash(row):
 
 def splitDataset(allTransactions):
     # randomly select 80% of the dataset to be train dataset and the rest to be test dataset
-    df = pd.DataFrame(np.random.RandomState(seed=2018).randn(len(allTransactions), 2)) #TODO remove seed
+    df = pd.DataFrame(np.random.randn(len(allTransactions), 2))
     mask = np.random.rand(len(df)) < 0.8
     train = allTransactions[mask]
     test = allTransactions[~mask]

@@ -1,11 +1,9 @@
 from datetime import timedelta
 import pandas as pd
 import numpy as np
-import os.path as path
 from difflib import SequenceMatcher
 from sklearn.svm import SVC
 from sklearn import tree
-import pickle
 
 ###############################################
 # general porpuse
@@ -90,12 +88,6 @@ class UserModel:
         self._monthlyIncomeFeatures = pd.DataFrame(self._transactions)
         self._weeklyIncomeFeatures = pd.DataFrame(self._transactions)
         self._subscriptionFeatures = pd.DataFrame(self._transactions)
-        self._cachFileWeek = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_week'
-        self._cachFileMonth = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_month'
-        self._cachFileSub = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_sub'
-        self._WeeklyIncomeModelCache = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_week_model'
-        self._monthlyIncomeModelCache = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_month_model'
-        self._subscriptionModelCache = '/home/gal/development/PycharmProjects/PPL_lab2/cache/' + userID + CACHE_FILE + '_sub_model'
         self._useCache = True
 
     def extractFeatures(self):
@@ -112,15 +104,12 @@ class UserModel:
 
 
     def trainModels(self, testUserModel):
-        alreadyTrained = self.loadSavedModels()
-
         # subscription model
         irrelevantColumns = self.getIrrelevantColumns(IS_SUBSCRIPTION)
-        if not alreadyTrained:
-            self._subscriptionModel = tree.DecisionTreeClassifier()
-            x = self._subscriptionFeatures.drop(irrelevantColumns, axis=1)
-            y = self._subscriptionFeatures[IS_SUBSCRIPTION]
-            self._subscriptionModel.fit(x, y)
+        self._subscriptionModel = tree.DecisionTreeClassifier()
+        x = self._subscriptionFeatures.drop(irrelevantColumns, axis=1)
+        y = self._subscriptionFeatures[IS_SUBSCRIPTION]
+        self._subscriptionModel.fit(x, y)
 
         x1 = testUserModel._subscriptionFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._subscriptionFeatures[IS_SUBSCRIPTION]
@@ -128,15 +117,14 @@ class UserModel:
 
         # month model
         irrelevantColumns = self.getIrrelevantColumns(TOTAL_MONTH_INCOME)
-        if not alreadyTrained:
-            self._monthModel = SVC(kernel='rbf')
-            x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
-            y = self._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
-            try:
-                self._monthModel.fit(x, y)
-            except:
-                y.ix[0] = y.ix[0] - 1
-                self._monthModel.fit(x, y)
+        self._monthModel = SVC(kernel='rbf')
+        x = self._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
+        y = self._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
+        try:
+            self._monthModel.fit(x, y)
+        except:
+            y.ix[0] = y.ix[0] - 1
+            self._monthModel.fit(x, y)
 
         x1 = testUserModel._monthlyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._monthlyIncomeFeatures[TOTAL_MONTH_INCOME].apply(lambda x: int(x))
@@ -144,23 +132,18 @@ class UserModel:
 
         # week
         irrelevantColumns = self.getIrrelevantColumns(TOTAL_WEEK_INCOME)
-        if not alreadyTrained:
-            self._weekModel = SVC(kernel='rbf')
-            x = self._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
-            y = self._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
-            try:
-                self._weekModel.fit(x, y)
-            except ValueError:
-                y.ix[0] = y.ix[0] - 1
-                self._weekModel.fit(x, y)
+        self._weekModel = SVC(kernel='rbf')
+        x = self._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
+        y = self._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
+        try:
+            self._weekModel.fit(x, y)
+        except ValueError:
+            y.ix[0] = y.ix[0] - 1
+            self._weekModel.fit(x, y)
 
         x1 = testUserModel._weeklyIncomeFeatures.drop(irrelevantColumns, axis=1)
         y1 = testUserModel._weeklyIncomeFeatures[TOTAL_WEEK_INCOME].apply(lambda x: int(x))
         print "test score for weekly income model:", self._weekModel.score(x1, y1)
-
-        if not alreadyTrained:
-            self.saveModels()
-
 
     def addUtilityColumns(self):
         for index, row in self._transactions.iterrows():
@@ -169,38 +152,6 @@ class UserModel:
             self._transactions.ix[index, DAY_OF_MONTH] = date[2]
             self._transactions.ix[index, MONTH] = date[1]
             self._transactions.ix[index, YEAR] = date[0]
-
-    def saveModels(self):
-        pickleWriter = open(self._WeeklyIncomeModelCache, 'wb')
-        pickle.dump(self._weekModel, pickleWriter)
-        pickleWriter.close()
-
-        pickleWriter = open(self._monthlyIncomeModelCache, 'wb')
-        pickle.dump(self._monthModel, pickleWriter)
-        pickleWriter.close()
-
-        pickleWriter = open(self._subscriptionModelCache, 'wb')
-        pickle.dump(self._subscriptionModel, pickleWriter)
-        pickleWriter.close()
-
-
-    def loadSavedModels(self):
-        if not path.isfile(self._WeeklyIncomeModelCache) or not path.isfile(self._monthlyIncomeModelCache) or not path.isfile(self._subscriptionModelCache):
-            return False
-
-        pickleReader = open(self._WeeklyIncomeModelCache, 'r')
-        self._weekModel = pickle.load(pickleReader)
-        pickleReader.close()
-
-        pickleReader = open(self._monthlyIncomeModelCache, 'r')
-        self._monthModel = pickle.load(pickleReader)
-        pickleReader.close()
-
-        pickleReader = open(self._subscriptionModelCache, 'r')
-        self._subscriptionModel = pickle.load(pickleReader)
-        pickleReader.close()
-
-        return True
 
 ################################################################################################
 ## predict
@@ -229,11 +180,11 @@ class UserModel:
         except:
             predictedIsSubscription = False
         try:
-            predictedMonthlyIncome = abs(self._monthModel.predict(monthlyIncomeFeatures)[0])
+            predictedMonthlyIncome = int(abs(self._monthModel.predict(monthlyIncomeFeatures)[0]))
         except:
             predictedMonthlyIncome = 504
         try:
-            predictedWeeklyIncome = abs(self._weekModel.predict(weeklyIncomeFeatures)[0])
+            predictedWeeklyIncome = int(abs(self._weekModel.predict(weeklyIncomeFeatures)[0]))
         except:
             predictedWeeklyIncome = 10
 
@@ -396,25 +347,16 @@ class UserModel:
 
     def addIncomeFeatures(self):
         self._transactions[IS_INCOME] = self._transactions.apply(lambda row: row[AMOUNT] < 0, axis=1)
-        if path.isfile(self._cachFileMonth) and self._useCache:
-            self._monthlyIncomeFeatures = pd.read_csv(self._cachFileMonth, parse_dates=[DATE])
-        else:
-            pastMonthIncomeFeatures = self._transactions.apply(self.calculatePastMonthIncome, axis=1)
-            currentMonthIncomeFeatures = self._transactions.apply(self.calculateCurrentMonthIncome, axis=1)
-            self._monthlyIncomeFeatures = pd.merge(self._monthlyIncomeFeatures, pastMonthIncomeFeatures, how='inner', on=ID)
-            self._monthlyIncomeFeatures = pd.merge(self._monthlyIncomeFeatures, currentMonthIncomeFeatures, how='inner', on=ID)
-            if self._useCache:
-                self._monthlyIncomeFeatures.to_csv(self._cachFileMonth, index=False)
 
-        if path.isfile(self._cachFileWeek) and self._useCache:
-            self._weeklyIncomeFeatures = pd.read_csv(self._cachFileWeek, parse_dates=[DATE])
-        else:
-            pastWeekIncomeFeatures = self._transactions.apply(self.calculatePastWeekIncome, axis=1)
-            currentWeekIncomeFeatures = self._transactions.apply(self.calculateCurrentWeekIncome, axis=1)
-            self._weeklyIncomeFeatures = pd.merge(self._weeklyIncomeFeatures, pastWeekIncomeFeatures, how='inner', on=ID)
-            self._weeklyIncomeFeatures = pd.merge(self._weeklyIncomeFeatures, currentWeekIncomeFeatures, how='inner', on=ID)
-            if self._useCache:
-                self._weeklyIncomeFeatures.to_csv(self._cachFileWeek, index=False)
+        pastMonthIncomeFeatures = self._transactions.apply(self.calculatePastMonthIncome, axis=1)
+        currentMonthIncomeFeatures = self._transactions.apply(self.calculateCurrentMonthIncome, axis=1)
+        self._monthlyIncomeFeatures = pd.merge(self._monthlyIncomeFeatures, pastMonthIncomeFeatures, how='inner', on=ID)
+        self._monthlyIncomeFeatures = pd.merge(self._monthlyIncomeFeatures, currentMonthIncomeFeatures, how='inner', on=ID)
+
+        pastWeekIncomeFeatures = self._transactions.apply(self.calculatePastWeekIncome, axis=1)
+        currentWeekIncomeFeatures = self._transactions.apply(self.calculateCurrentWeekIncome, axis=1)
+        self._weeklyIncomeFeatures = pd.merge(self._weeklyIncomeFeatures, pastWeekIncomeFeatures, how='inner', on=ID)
+        self._weeklyIncomeFeatures = pd.merge(self._weeklyIncomeFeatures, currentWeekIncomeFeatures, how='inner', on=ID)
 
 
 ################################################################################################
@@ -546,10 +488,6 @@ class UserModel:
 
 
     def addSubscriptionFeatures(self):
-        if path.isfile(self._cachFileSub) and self._useCache:
-            self._subscriptionFeatures = pd.read_csv(self._cachFileSub, parse_dates=[DATE])
-            return
-
         self._subscriptionFeatures[IS_SUBSCRIPTION] = np.nan
         self._subscriptionFeatures[IS_SUBSCRIPTION] = self._subscriptionFeatures.apply(self.isSubscription, axis=1)
         self._subscriptionFeatures[IS_PAST_WEEK_SIMILAR_AMOUNT] = self._subscriptionFeatures.apply(self.getIsSimilarAmountPastWeek, axis=1)
@@ -558,5 +496,3 @@ class UserModel:
         self._subscriptionFeatures[IS_PAST_MONTH_SIMILAR_CATEGORY] = self._subscriptionFeatures.apply(self.getIsSimilarCategoryPastMonth, axis=1)
         self._subscriptionFeatures[WEEK_INTERVAL_NAME_SIMILARITY] = self._subscriptionFeatures.apply(self.getNameSimilarityPastWeek, axis=1)
         self._subscriptionFeatures[MONTH_INTERVAL_NAME_SIMILARITY] = self._subscriptionFeatures.apply(self.getNameSimilarityPastMonth, axis=1)
-        if self._useCache:
-            self._subscriptionFeatures.to_csv(self._cachFileSub, index=False)
